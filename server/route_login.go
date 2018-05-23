@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func loginRoute(ctx *gin.Context) {
-	ctx.Redirect(http.StatusTemporaryRedirect, discordTokenRedirect)
+	ctx.Redirect(http.StatusTemporaryRedirect, discordOauth2Redirect)
 }
 
 func loginCallbackRoute(ctx *gin.Context) {
@@ -18,11 +18,19 @@ func loginCallbackRoute(ctx *gin.Context) {
 		return
 	}
 
-	tr, err := getToken(code)
+	tr, err := authorizeOauth2Code(code)
 	if err != nil {
+		log.Printf("Error while authorizing code: %v\n", err)
 		sendBadMessage(ctx, "An error occurred while attempting to authorize provided code.")
 		return
 	}
 
-	fmt.Printf("AccessToken: %s\nTokenType: %s\nExpiresIn: %v\nRefreshToken: %s\nScope: %s\n", tr.AccessToken, tr.TokenType, tr.ExpiresIn, tr.RefreshToken, tr.Scope)
+	// ctx.Header("Content-Type", "application/json")
+	// ctx.Writer.Write(body)
+	// du, err := fetchDiscordUser(tr.AccessToken)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	ctx.JSON(http.StatusOK, tr)
 }

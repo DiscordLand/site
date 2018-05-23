@@ -2,10 +2,20 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg"
 )
 
+var db *pg.DB
+
 func main() {
+	// var err error
+	// db, err = database.Init()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 	app := gin.New()
+	app.StaticFile("/", "../client/index.html")
 
 	api := app.Group("/api")
 	api.Use(func(ctx *gin.Context) {

@@ -3,25 +3,31 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/url"
+	"os"
+
+	"github.com/bwmarrin/discordgo"
 
 	"github.com/gin-gonic/gin"
 )
 
+var oauth2Redirect = discordgo.EndpointDiscord + "oauth2/authorize?client_id=" + clientID + "&scope=identify&response_type=code&callback_uri=" + url.QueryEscape(os.Getenv("BASE")+"/api/login/callback")
+
 func loginRoute(ctx *gin.Context) {
-	ctx.Redirect(http.StatusTemporaryRedirect, discordOauth2Redirect)
+	ctx.Redirect(http.StatusTemporaryRedirect, oauth2Redirect)
 }
 
 func loginCallbackRoute(ctx *gin.Context) {
 	code, exists := ctx.GetQuery("code")
 	if !exists {
-		sendBadMessage(ctx, "No code parameter was provided.")
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "No code provided."})
 		return
 	}
 
-	tr, err := authorizeOauth2Code(code)
+	tr, err := oa.AuthorizeCode(code)
 	if err != nil {
 		log.Printf("Error while authorizing code: %v\n", err)
-		sendBadMessage(ctx, "An error occurred while attempting to authorize provided code.")
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to authorize given code."})
 		return
 	}
 

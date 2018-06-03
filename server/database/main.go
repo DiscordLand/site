@@ -12,7 +12,7 @@ func Init() (*pg.DB, error) {
 		Password: "test",
 	})
 
-	for _, model := range []interface{}{&DiscordUser{}, &User{}, &Bot{}, &WebSession{}} {
+	for _, model := range []interface{}{&DiscordUser{}, &User{}, &Bot{}, &Session{}} {
 		err := db.CreateTable(model, &orm.CreateTableOptions{
 			IfNotExists: true,
 		})

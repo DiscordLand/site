@@ -45,28 +45,28 @@ func New(clientID, clientSecret string) *OAuth {
 func (o *OAuth) AuthorizeCode(code string) (tr *TokenResponse, err error) {
 	body, err := http.Request("POST", codeEndpoint(code), http.Headers{"Authorization": o.AuthorizationHeader})
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	err = json.Unmarshal(body, &tr)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	return tr, nil
+	return
 }
 
 // FetchUser gets a user's information by their access token
 func (o *OAuth) FetchUser(accessToken string) (du *database.DiscordUser, err error) {
 	body, err := http.Request("GET", meEndpoint, http.Headers{"Authorization": "Bearer " + accessToken})
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	err = json.Unmarshal(body, &du)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	return du, nil
+	return
 }

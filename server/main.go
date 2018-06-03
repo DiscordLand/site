@@ -1,8 +1,10 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
+	"discord.land/site/server/database"
 	"discord.land/site/server/utilities/oauth"
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg"
@@ -27,20 +29,38 @@ func cors(ctx *gin.Context) {
 
 func main() {
 	oa = oauth.New(clientID, clientToken)
-	println(oauth2Redirect)
-	// var err error
-	// db, err = database.Init()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	var err error
+	db, err = database.Init()
+	if err != nil {
+		panic(err)
+	}
 
 	app := gin.New()
-	app.StaticFile("/", "../client/index.html")
+	app.LoadHTMLGlob("site/server/client/*")
+	app.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index", gin.H{})
+	})
+	// app.StaticFile("/", "../client/index.html")
 
 	api := app.Group("/api")
 
-	api.GET("/login", loginRoute)
-	api.GET("/login/callback", loginCallbackRoute)
+	api.GET("/bots", botsGET)
+	api.GET("/bots/:id", botGET)
+	api.POST("/bots", botsPOST)
+	// api.PATCH("/bots/:id", botsModifyRoute)
+	// api.DELETE("/bots/:id", botsDeleteRoute)
+
+	api.GET("/login", loginGET)
+	api.GET("/login/callback", loginCallbackGET)
+	api.POST("/logout", logoutPOST)
 
 	app.Run(port)
+}
+
+type messageResponse struct {
+	Message string `json:"message"`
+}
+
+func sendMessage(ctx *gin.Context, code int, message string) {
+	ctx.JSON(code, messageResponse{message})
 }
